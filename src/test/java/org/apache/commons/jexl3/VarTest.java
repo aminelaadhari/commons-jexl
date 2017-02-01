@@ -24,15 +24,14 @@ import java.util.List;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 
 /**
  * Tests local variables.
  */
 @SuppressWarnings({"UnnecessaryBoxing", "AssertEqualsBetweenInconvertibleTypes"})
 public class VarTest extends JexlTestCase {
-    static final Log LOGGER = LogFactory.getLog(VarTest.class.getName());
+    static final JexlLog LOGGER = new TestLogger();
 
     public VarTest() {
         super("VarTest");

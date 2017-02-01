@@ -20,7 +20,6 @@ package org.apache.commons.jexl3;
 import org.apache.commons.jexl3.internal.Engine;
 import org.apache.commons.jexl3.introspection.JexlSandbox;
 import org.apache.commons.jexl3.introspection.JexlUberspect;
-import org.apache.commons.logging.Log;
 
 import java.util.Map;
 import java.nio.charset.Charset;
@@ -70,8 +69,8 @@ public class JexlBuilder {
     /** The sandbox. */
     private JexlSandbox sandbox = null;
 
-    /** The Log to which all JexlEngine messages will be logged. */
-    private Log logger = null;
+    /** The JexlLog to which all JexlEngine messages will be logged. */
+    private JexlLog logger = null;
 
     /**
      * Whether expressions evaluated by this engine will throw exceptions (false) or
@@ -169,18 +168,18 @@ public class JexlBuilder {
     }
 
     /**
-     * Sets the o.a.c.Log instance to use.
+     * Sets the o.a.c.JexlLog instance to use.
      * 
      * @param l the logger
      * @return this builder
      */
-    public JexlBuilder logger(Log l) {
+    public JexlBuilder logger(JexlLog l) {
         this.logger = l;
         return this;
     }
 
     /** @return the logger */
-    public Log logger() {
+    public JexlLog logger() {
         return this.logger;
     }
 

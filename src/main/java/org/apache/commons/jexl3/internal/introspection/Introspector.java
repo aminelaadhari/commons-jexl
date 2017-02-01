@@ -16,7 +16,7 @@
  */
 package org.apache.commons.jexl3.internal.introspection;
 
-import org.apache.commons.logging.Log;
+import org.apache.commons.jexl3.JexlLog;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -62,7 +62,7 @@ public final class Introspector {
     /**
      * the logger.
      */
-    protected final Log rlog;
+    protected final JexlLog rlog;
     /**
      * The class loader used to solve constructors if needed.
      */
@@ -89,7 +89,7 @@ public final class Introspector {
      * @param log     the logger to use
      * @param cloader the class loader
      */
-    public Introspector(Log log, ClassLoader cloader) {
+    public Introspector(JexlLog log, ClassLoader cloader) {
         this.rlog = log;
         loader = cloader;
     }

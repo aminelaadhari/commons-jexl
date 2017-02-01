@@ -16,13 +16,7 @@
  */
 package org.apache.commons.jexl3.internal;
 
-import org.apache.commons.jexl3.JexlArithmetic;
-import org.apache.commons.jexl3.JexlBuilder;
-import org.apache.commons.jexl3.JexlContext;
-import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.jexl3.JexlException;
-import org.apache.commons.jexl3.JexlInfo;
-import org.apache.commons.jexl3.JexlScript;
+import org.apache.commons.jexl3.*;
 import org.apache.commons.jexl3.internal.introspection.SandboxUberspect;
 import org.apache.commons.jexl3.internal.introspection.Uberspect;
 import org.apache.commons.jexl3.introspection.JexlMethod;
@@ -49,30 +43,13 @@ import java.util.Set;
 import java.lang.ref.SoftReference;
 import java.nio.charset.Charset;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * A JexlEngine implementation.
+ *
  * @since 2.0
  */
 public class Engine extends JexlEngine {
-    /**
-     * Gets the default instance of Uberspect.
-     * <p>This is lazily initialized to avoid building a default instance if there
-     * is no use for it. The main reason for not using the default Uberspect instance is to
-     * be able to use a (low level) introspector created with a given logger
-     * instead of the default one.</p>
-     * <p>Implemented as on demand holder idiom.</p>
-     */
-    private static final class UberspectHolder {
-        /** The default uberspector that handles all introspection patterns. */
-        private static final Uberspect UBERSPECT =
-                new Uberspect(LogFactory.getLog(JexlEngine.class), JexlUberspect.JEXL_STRATEGY);
 
-        /** Non-instantiable. */
-        private UberspectHolder() {}
-    }
     /**
      * The JexlUberspect instance.
      */
@@ -82,9 +59,9 @@ public class Engine extends JexlEngine {
      */
     protected final JexlArithmetic arithmetic;
     /**
-     * The Log to which all JexlEngine messages will be logged.
+     * The JexlLog to which all JexlEngine messages will be logged.
      */
-    protected final Log logger;
+    protected final JexlLog logger;
     /**
      * The {@link Parser}; when parsing expressions, this engine synchronizes on the parser.
      */
@@ -136,6 +113,7 @@ public class Engine extends JexlEngine {
 
     /**
      * Creates a JEXL engine using the provided {@link JexlBuilder}.
+     *
      * @param conf the builder
      */
     public Engine(JexlBuilder conf) {
@@ -150,7 +128,7 @@ public class Engine extends JexlEngine {
         } else {
             this.uberspect = new SandboxUberspect(uber, sandbox);
         }
-        this.logger = conf.logger() == null ? LogFactory.getLog(JexlEngine.class) : conf.logger();
+        this.logger = conf.logger() == null ? new JexlEmptyLogger() : conf.logger();
         this.functions = conf.namespaces() == null ? Collections.<String, Object>emptyMap() : conf.namespaces();
         this.silent = conf.silent() == null ? false : conf.silent();
         this.debug = conf.debug() == null ? true : conf.debug();
@@ -170,14 +148,14 @@ public class Engine extends JexlEngine {
      * is no use for it. The main reason for not using the default Uberspect instance is to
      * be able to use a (low level) introspector created with a given logger
      * instead of the default one.</p>
-     * @param logger the logger to use for the underlying Uberspect
+     *
+     * @param logger   the logger to use for the underlying Uberspect
      * @param strategy the property resolver strategy
      * @return Uberspect the default uberspector instance.
      */
-    public static Uberspect getUberspect(Log logger, JexlUberspect.ResolverStrategy strategy) {
-        if ((logger == null || logger.equals(LogFactory.getLog(JexlEngine.class)))
-            && (strategy == null || strategy == JexlUberspect.JEXL_STRATEGY)) {
-            return UberspectHolder.UBERSPECT;
+    public static Uberspect getUberspect(JexlLog logger, JexlUberspect.ResolverStrategy strategy) {
+        if (logger == null) {
+            return new Uberspect(new JexlEmptyLogger(), strategy);
         }
         return new Uberspect(logger, strategy);
     }
@@ -224,6 +202,7 @@ public class Engine extends JexlEngine {
 
     /**
      * Swaps the current thread local context.
+     *
      * @param tls the context or null
      * @return the previous thread local context
      */
@@ -237,6 +216,7 @@ public class Engine extends JexlEngine {
      * A soft referenced cache.
      * <p>The actual cache is held through a soft reference, allowing it to be GCed under
      * memory pressure.</p>
+     *
      * @param <K> the cache key entry type
      * @param <V> the cache key value type
      */
@@ -252,6 +232,7 @@ public class Engine extends JexlEngine {
 
         /**
          * Creates a new instance of a soft cache.
+         *
          * @param theSize the cache size
          */
         SoftCache(int theSize) {
@@ -260,6 +241,7 @@ public class Engine extends JexlEngine {
 
         /**
          * Returns the cache size.
+         *
          * @return the cache size
          */
         int size() {
@@ -275,6 +257,7 @@ public class Engine extends JexlEngine {
 
         /**
          * Produces the cache entry set.
+         *
          * @return the cache entry set
          */
         Set<Entry<K, V>> entrySet() {
@@ -284,6 +267,7 @@ public class Engine extends JexlEngine {
 
         /**
          * Gets a value from cache.
+         *
          * @param key the cache entry key
          * @return the cache entry value
          */
@@ -294,6 +278,7 @@ public class Engine extends JexlEngine {
 
         /**
          * Puts a value in cache.
+         *
          * @param key    the cache entry key
          * @param script the cache entry value
          */
@@ -309,6 +294,7 @@ public class Engine extends JexlEngine {
 
     /**
      * Creates a cache.
+     *
      * @param <K>       the key type
      * @param <V>       the value type
      * @param cacheSize the cache size, must be &gt; 0
@@ -337,6 +323,7 @@ public class Engine extends JexlEngine {
 
     /**
      * Creates an interpreter.
+     *
      * @param context a JexlContext; if null, the empty context is used instead.
      * @param frame   the interpreter frame
      * @return an Interpreter
@@ -476,6 +463,7 @@ public class Engine extends JexlEngine {
     /**
      * Creates a new instance of an object using the most appropriate constructor
      * based on the arguments.
+     *
      * @param clazz the class to instantiate
      * @param args  the constructor arguments
      * @return the created object instance or null on failure when silent
@@ -513,9 +501,10 @@ public class Engine extends JexlEngine {
      * Gets the list of variables accessed by a script.
      * <p>This method will visit all nodes of a script and extract all variables whether they
      * are written in 'dot' or 'bracketed' notation. (a.b is equivalent to a['b']).</p>
+     *
      * @param script the script
      * @return the set of variables, each as a list of strings (ant-ish variables use more than 1 string)
-     *         or the empty set if no variables are used
+     * or the empty set if no variables are used
      */
     protected Set<List<String>> getVariables(ASTJexlScript script) {
         VarCollector collector = new VarCollector();
@@ -542,6 +531,7 @@ public class Engine extends JexlEngine {
 
         /**
          * Starts/stops a variable collect.
+         *
          * @param node starts if not null, stop if null
          */
         public void collect(JexlNode node) {
@@ -561,6 +551,7 @@ public class Engine extends JexlEngine {
 
         /**
          * Adds a 'segment' to the variable being collected.
+         *
          * @param name the name
          */
         public void add(String name) {
@@ -568,7 +559,7 @@ public class Engine extends JexlEngine {
         }
 
         /**
-         *@return the collected variables
+         * @return the collected variables
          */
         public Set<List<String>> collected() {
             return refs;
@@ -577,8 +568,9 @@ public class Engine extends JexlEngine {
 
     /**
      * Fills up the list of variables accessed by a node.
-     * @param script the owning script
-     * @param node the node
+     *
+     * @param script    the owning script
+     * @param node      the node
      * @param collector the variable collector
      */
     protected void getVariables(final ASTJexlScript script, JexlNode node, VarCollector collector) {
@@ -639,6 +631,7 @@ public class Engine extends JexlEngine {
 
     /**
      * Gets the array of parameters from a script.
+     *
      * @param script the script
      * @return the parameters which may be empty (but not null) if no parameters were defined
      * @since 3.0
@@ -649,6 +642,7 @@ public class Engine extends JexlEngine {
 
     /**
      * Gets the array of local variable from a script.
+     *
      * @param script the script
      * @return the local variables array which may be empty (but not null) if no local variables were defined
      * @since 3.0
@@ -660,10 +654,10 @@ public class Engine extends JexlEngine {
     /**
      * Parses an expression.
      *
-     * @param info      information structure
-     * @param src      the expression to parse
-     * @param scope     the script frame
-     * @param registers whether the parser should allow the unnamed '#number' syntax for 'registers'
+     * @param info       information structure
+     * @param src        the expression to parse
+     * @param scope      the script frame
+     * @param registers  whether the parser should allow the unnamed '#number' syntax for 'registers'
      * @param expression whether the parser allows scripts or only expressions
      * @return the parsed tree
      * @throws JexlException if any error occurred during parsing
@@ -691,6 +685,7 @@ public class Engine extends JexlEngine {
 
     /**
      * Trims the source from front and ending spaces.
+     *
      * @param str expression to clean
      * @return trimmed expression ending in a semi-colon
      */
@@ -716,12 +711,13 @@ public class Engine extends JexlEngine {
 
     /**
      * Gets and/or creates a default template engine.
+     *
      * @return a template engine
      */
     protected TemplateEngine jxlt() {
         TemplateEngine e = jxlt;
         if (e == null) {
-            synchronized(this) {
+            synchronized (this) {
                 if (jxlt == null) {
                     e = new TemplateEngine(this, true, 0, '$', '#');
                     jxlt = e;

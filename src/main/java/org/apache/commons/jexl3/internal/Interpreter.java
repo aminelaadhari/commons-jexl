@@ -16,12 +16,7 @@
  */
 package org.apache.commons.jexl3.internal;
 
-import org.apache.commons.jexl3.JexlArithmetic;
-import org.apache.commons.jexl3.JexlOperator;
-import org.apache.commons.jexl3.JexlContext;
-import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.jexl3.JexlException;
-import org.apache.commons.jexl3.JexlScript;
+import org.apache.commons.jexl3.*;
 
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlPropertyGet;
@@ -106,7 +101,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
+import org.apache.commons.jexl3.JexlLog;
 
 /**
  * An interpreter of JEXL syntax.
@@ -117,7 +112,7 @@ public class Interpreter extends ParserVisitor {
     /** The JEXL engine. */
     protected final Engine jexl;
     /** The logger. */
-    protected final Log logger;
+    protected final JexlLog logger;
     /** The uberspect. */
     protected final JexlUberspect uberspect;
     /** The arithmetic handler. */
