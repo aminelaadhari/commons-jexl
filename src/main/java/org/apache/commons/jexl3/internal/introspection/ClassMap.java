@@ -16,7 +16,7 @@
  */
 package org.apache.commons.jexl3.internal.introspection;
 
-import org.apache.commons.logging.Log;
+import org.apache.commons.jexl3.JexlLog;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -90,7 +90,7 @@ final class ClassMap {
      * @param log the logger.
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    ClassMap(Class<?> aClass, Log log) {
+    ClassMap(Class<?> aClass, JexlLog log) {
         // eagerly cache methods
         create(this, aClass, log);
         // eagerly cache public fields
@@ -197,9 +197,9 @@ final class ClassMap {
      * that our class, its parents and their implemented interfaces provide.
      * @param cache the ClassMap instance we create
      * @param classToReflect the class to cache
-     * @param log the Log
+     * @param log the JexlLog
      */
-    private static void create(ClassMap cache, Class<?> classToReflect, Log log) {
+    private static void create(ClassMap cache, Class<?> classToReflect, JexlLog log) {
         //
         // Build a list of all elements in the class hierarchy. This one is bottom-first (i.e. we start
         // with the actual declaring class and its interfaces and then move up (superclass etc.) until we
@@ -254,9 +254,9 @@ final class ClassMap {
      * Recurses up interface hierarchy to get all super interfaces.
      * @param cache the cache to fill
      * @param iface the interface to populate the cache from
-     * @param log the Log
+     * @param log the JexlLog
      */
-    private static void populateWithInterface(ClassMap cache, Class<?> iface, Log log) {
+    private static void populateWithInterface(ClassMap cache, Class<?> iface, JexlLog log) {
         if (Modifier.isPublic(iface.getModifiers())) {
             populateWithClass(cache, iface, log);
         }
@@ -270,9 +270,9 @@ final class ClassMap {
      * Recurses up class hierarchy to get all super classes.
      * @param cache the cache to fill
      * @param clazz the class to populate the cache from
-     * @param log the Log
+     * @param log the JexlLog
      */
-    private static void populateWithClass(ClassMap cache, Class<?> clazz, Log log) {
+    private static void populateWithClass(ClassMap cache, Class<?> clazz, JexlLog log) {
         try {
             Method[] methods = clazz.getDeclaredMethods();
             for (int i = 0; i < methods.length; i++) {

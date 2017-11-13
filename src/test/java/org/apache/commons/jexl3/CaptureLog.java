@@ -17,12 +17,11 @@ package org.apache.commons.jexl3;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 
 /**
  * A log implementation to help control tests results.
  */
-public class CaptureLog implements Log {
+public class CaptureLog implements JexlLog {
     private List<Object[]> captured = new ArrayList<Object[]>();
 
     static Object caller() {

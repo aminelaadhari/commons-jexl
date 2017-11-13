@@ -19,7 +19,6 @@ package org.apache.commons.jexl3;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.jexl3.internal.Engine;
-import org.apache.commons.logging.Log;
 import org.junit.Assert;
 import org.junit.Test;
 

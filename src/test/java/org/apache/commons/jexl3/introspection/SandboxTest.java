@@ -22,11 +22,11 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlScript;
 import org.apache.commons.jexl3.JexlTestCase;
+import org.apache.commons.jexl3.JexlLog;
+import org.apache.commons.jexl3.TestLogger;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.annotations.NoJexl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,7 +36,7 @@ import org.junit.Test;
  */
 @SuppressWarnings({"UnnecessaryBoxing", "AssertEqualsBetweenInconvertibleTypes"})
 public class SandboxTest extends JexlTestCase {
-    static final Log LOGGER = LogFactory.getLog(SandboxTest.class.getName());
+    static final JexlLog LOGGER = new TestLogger();
 
     public SandboxTest() {
         super("SandboxTest");

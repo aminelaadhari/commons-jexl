@@ -22,13 +22,12 @@ import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlOperator;
+import org.apache.commons.jexl3.JexlLog;
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlUberspect;
 import org.apache.commons.jexl3.parser.JexlNode;
 import org.apache.commons.jexl3.parser.ParserVisitor;
 
-
-import org.apache.commons.logging.Log;
 
 /**
  * The helper base of an interpreter of JEXL syntax.
@@ -38,7 +37,7 @@ public abstract class InterpreterBase extends ParserVisitor {
     /** The JEXL engine. */
     protected final Engine jexl;
     /** The logger. */
-    protected final Log logger;
+    protected final JexlLog logger;
     /** The uberspect. */
     protected final JexlUberspect uberspect;
     /** The arithmetic handler. */
