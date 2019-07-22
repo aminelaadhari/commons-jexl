@@ -40,7 +40,7 @@ public abstract class InterpreterBase extends ParserVisitor {
     /** The context to store/retrieve variables. */
     protected final JexlContext context;
     /** Cancellation support. */
-    protected volatile boolean cancelled = false;
+    protected boolean cancelled = false;
     /** Empty parameters for method matching. */
     protected static final Object[] EMPTY_PARAMS = new Object[0];
 
