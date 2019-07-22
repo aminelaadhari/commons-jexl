@@ -17,6 +17,12 @@
 package org.apache.commons.jexl3.internal;
 
 import org.apache.commons.jexl3.*;
+import org.apache.commons.jexl3.introspection.JexlMethod;
+import org.apache.commons.jexl3.introspection.JexlUberspect;
+import org.apache.commons.jexl3.parser.JexlNode;
+import org.apache.commons.jexl3.parser.ParserVisitor;
+
+
 
 /**
  * The helper base of an interpreter of JEXL syntax.

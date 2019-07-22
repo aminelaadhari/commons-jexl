@@ -18,8 +18,8 @@ package org.apache.commons.jexl3;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.jexl3.internal.Engine;
-import org.apache.commons.logging.Log;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,7 +28,9 @@ import org.junit.Test;
  */
 @SuppressWarnings({"UnnecessaryBoxing", "AssertEqualsBetweenInconvertibleTypes"})
 public class ExceptionTest extends JexlTestCase {
-    /** create a named test */
+    /**
+     * create a named test
+     */
     public ExceptionTest() {
         super("ExceptionTest");
     }
@@ -65,7 +67,8 @@ public class ExceptionTest extends JexlTestCase {
         ctxt.setStrict(true);
         // empty cotext
         try {
-            /* Object o = */ e.evaluate(ctxt);
+            /* Object o = */
+            e.evaluate(ctxt);
             Assert.fail("c.e not defined as variable should throw");
         } catch (JexlException.Variable xjexl) {
             String msg = xjexl.getMessage();
@@ -76,7 +79,8 @@ public class ExceptionTest extends JexlTestCase {
         ctxt.setStrictArithmetic(true);
         ctxt.set("c.e", null);
         try {
-            /* Object o = */ e.evaluate(ctxt);
+            /* Object o = */
+            e.evaluate(ctxt);
             Assert.fail("c.e as null operand should throw");
         } catch (JexlException.Variable xjexl) {
             String msg = xjexl.getMessage();
@@ -86,7 +90,8 @@ public class ExceptionTest extends JexlTestCase {
         // allow null operands
         ctxt.setStrictArithmetic(false);
         try {
-            /* Object o = */ e.evaluate(ctxt);
+            /* Object o = */
+            e.evaluate(ctxt);
 
         } catch (JexlException xjexl) {
             Assert.fail("c.e in expr should not throw");
@@ -96,7 +101,8 @@ public class ExceptionTest extends JexlTestCase {
         ctxt.set("c", "{ 'a' : 3, 'b' : 5}");
         ctxt.set("e", Integer.valueOf(2));
         try {
-            /* Object o = */ e.evaluate(ctxt);
+            /* Object o = */
+            e.evaluate(ctxt);
             Assert.fail("c.e not accessible as property should throw");
         } catch (JexlException.Property xjexl) {
             String msg = xjexl.getMessage();
@@ -117,7 +123,8 @@ public class ExceptionTest extends JexlTestCase {
         ctxt.setStrictArithmetic(true);
         // empty cotext
         try {
-            /* Object o = */ e.execute(ctxt);
+            /* Object o = */
+            e.execute(ctxt);
             Assert.fail("x is null, should throw");
         } catch (JexlException xjexl) {
             String msg = xjexl.getMessage();
@@ -145,7 +152,8 @@ public class ExceptionTest extends JexlTestCase {
         ctxt.setStrict(true);
         // empty cotext
         try {
-            /* Object o = */ e.evaluate(ctxt);
+            /* Object o = */
+            e.evaluate(ctxt);
             Assert.fail("c.e not declared as variable should throw");
         } catch (JexlException.Variable xjexl) {
             String msg = xjexl.getMessage();
@@ -156,7 +164,8 @@ public class ExceptionTest extends JexlTestCase {
         ctxt.setStrictArithmetic(true);
         ctxt.set("c.e", null);
         try {
-            /* Object o = */ e.evaluate(ctxt);
+            /* Object o = */
+            e.evaluate(ctxt);
             Assert.fail("c.e as null operand should throw");
         } catch (JexlException xjexl) {
             String msg = xjexl.getMessage();
@@ -183,6 +192,7 @@ public class ExceptionTest extends JexlTestCase {
         doTest206(src, true, false);
         doTest206(src, true, true);
     }
+
     private void doTest206(String src, boolean strict, boolean silent) throws Exception {
         CaptureLog l = new CaptureLog();
         JexlContext jc = new MapContext();
@@ -195,7 +205,7 @@ public class ExceptionTest extends JexlTestCase {
             if (strict && !silent) {
                 Assert.fail("should have thrown an exception");
             }
-        } catch(JexlException xjexl) {
+        } catch (JexlException xjexl) {
             if (!strict || silent) {
                 Assert.fail("should not have thrown an exception");
             }
