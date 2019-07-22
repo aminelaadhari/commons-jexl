@@ -24,7 +24,10 @@ import java.util.Map;
 /**
  * A JEXL evaluation environment wrapping variables, namespace and options.
  */
-public class JexlEvalContext implements JexlContext, JexlContext.NamespaceResolver, JexlEngine.Options {
+public class JexlEvalContext implements
+       JexlContext,
+       JexlContext.NamespaceResolver,
+       JexlEngine.Options {
     /** The marker for the empty vars. */
     private static final Map<String,Object> EMPTY_MAP = Collections.<String,Object>emptyMap();
     /** The variables.*/
@@ -35,6 +38,8 @@ public class JexlEvalContext implements JexlContext, JexlContext.NamespaceResolv
     private Boolean silent = null;
     /** Whether the engine should be strict. */
     private Boolean strict = null;
+    /** Whether the engine should be cancellable. */
+    private Boolean cancellable = null;
     /** Whether the arithmetic should be strict. */
     private Boolean mathStrict = null;
     /** The math scale the arithmetic should use. */
@@ -109,8 +114,20 @@ public class JexlEvalContext implements JexlContext, JexlContext.NamespaceResolv
     public void clearOptions() {
         silent = null;
         strict = null;
+        cancellable = null;
         mathScale = -1;
         mathContext = null;
+    }
+
+    /**
+     * Set options from engine.
+     * @param jexl the engine
+     */
+    public void setOptions(JexlEngine jexl) {
+        silent = jexl.isSilent();
+        strict = jexl.isStrict();
+        mathScale = jexl.getArithmetic().getMathScale();
+        mathContext = jexl.getArithmetic().getMathContext();
     }
 
     /**
@@ -127,13 +144,26 @@ public class JexlEvalContext implements JexlContext, JexlContext.NamespaceResolv
     }
 
     /**
+     * Sets whether the engine will throw JexlException.Cancel during evaluation when interrupted.
+     * @param s true means JexlException.Cancel will be thrown, false implies null will be returned
+     */
+    public void setCancellable(boolean c) {
+        this.cancellable = c ? Boolean.TRUE : Boolean.FALSE;
+    }
+
+    @Override
+    public Boolean isCancellable() {
+        return this.cancellable;
+    }
+
+    /**
      * Sets the engine and arithmetic strict flags in one call.
      * @param se the engine strict flag
      * @param sa the arithmetic strict flag
      */
-    public void setStrict(boolean se, boolean sa) {
-        this.strict = se ? Boolean.TRUE : Boolean.FALSE;
-        this.mathStrict = sa ? Boolean.TRUE : Boolean.FALSE;
+    public void setStrict(Boolean se, Boolean sa) {
+        this.strict = se == null? null : se ? Boolean.TRUE : Boolean.FALSE;
+        this.mathStrict = sa == null? null : sa ? Boolean.TRUE : Boolean.FALSE;
     }
 
     /**

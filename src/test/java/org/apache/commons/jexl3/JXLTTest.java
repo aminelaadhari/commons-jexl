@@ -678,10 +678,14 @@ public class JXLTTest extends JexlTestCase {
 
     @Test
     public void testInterpolation() throws Exception {
-        context.set("user", "Dimitri");
         String expr =  "`Hello \n${user}`";
-        Object value = JEXL.createScript(expr).execute(context);
+        JexlScript script = JEXL.createScript(expr);
+        context.set("user", "Dimitri");
+        Object value = script.execute(context);
         Assert.assertEquals(expr, "Hello \nDimitri", value);
+        context.set("user", "Rahul");
+        value = script.execute(context);
+        Assert.assertEquals(expr, "Hello \nRahul", value);
     }
 
     @Test
@@ -716,10 +720,13 @@ public class JXLTTest extends JexlTestCase {
         String expr =  "(user)->{`Hello \n${user}`}";
         Object value = JEXL.createScript(expr).execute(context, "Henrib");
         Assert.assertEquals(expr, "Hello \nHenrib", value);
+        value = JEXL.createScript(expr).execute(context, "Dimitri");
+        Assert.assertEquals(expr, "Hello \nDimitri", value);
     }
 //
 //
-//    @Test public void testDeferredTemplate() throws Exception {
+//    @Test
+//    public void testDeferredTemplate() throws Exception {
 //        JxltEngine.Template t = JXLT.createTemplate("$$", new StringReader(
 //             "select * from \n"+
 //             "##for(var c : tables) {\n"+

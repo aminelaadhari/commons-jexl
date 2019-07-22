@@ -14,39 +14,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.jexl3.parser;
-
-public final class ASTJxltLiteral extends JexlNode {
-    /** The actual literal value; the inherited 'value' member may host a cached template expression. */
-    private String literal = null;
-
-    ASTJxltLiteral(int id) {
-        super(id);
-    }
-
-    ASTJxltLiteral(Parser p, int id) {
-        super(p, id);
-    }
-
-    void setLiteral(String literal) {
-        this.literal = literal;
-    }
-
-    /**
-     * Gets the literal value.
-     * @return the string literal
-     */
-    public String getLiteral() {
-        return this.literal;
-    }
-
-    @Override
-    public String toString() {
-        return this.literal;
-    }
-
-    @Override
-    public Object jjtAccept(ParserVisitor visitor, Object data) {
-        return visitor.visit(this, data);
-    }
-}
+//(x, y)->{ x + y }
+x + y

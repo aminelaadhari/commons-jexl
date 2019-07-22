@@ -26,7 +26,6 @@ import org.apache.commons.jexl3.parser.JexlNode;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 /**
  * <p>A JexlScript implementation.</p>
@@ -75,7 +74,10 @@ public class Script implements JexlScript, JexlExpression {
     protected void checkCacheVersion() {
         int uberVersion = jexl.getUberspect().getVersion();
         if (version != uberVersion) {
-            script.clearCache();
+            // version 0 of the uberSpect is an illusion due to order of construction; no need to clear cache
+            if (version > 0) {
+                script.clearCache();
+            }
             version = uberVersion;
         }
     }
@@ -106,25 +108,16 @@ public class Script implements JexlScript, JexlExpression {
         return jexl;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getSourceText() {
         return source;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getParsedText() {
         return getParsedText(2);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getParsedText(int indent) {
         Debugger debug = new Debugger();
@@ -169,37 +162,22 @@ public class Script implements JexlScript, JexlExpression {
             debug.debug(script);
             src = debug.toString();
         }
-        return src == null ? "/*no source*/" : src.toString();
+        return src.toString();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object evaluate(JexlContext context) {
-        if (script.jjtGetNumChildren() < 1) {
-            return null;
-        }
-        checkCacheVersion();
-        Scope.Frame frame = createFrame((Object[]) null);
-        Interpreter interpreter = createInterpreter(context, frame);
-        return interpreter.interpret(script.jjtGetChild(0));
+        return execute(context);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object execute(JexlContext context) {
         checkCacheVersion();
-        Scope.Frame frame = createFrame((Object[]) null);
+        Scope.Frame frame = createFrame(null);
         Interpreter interpreter = createInterpreter(context, frame);
         return interpreter.interpret(script);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object execute(JexlContext context, Object... args) {
         checkCacheVersion();
@@ -262,9 +240,6 @@ public class Script implements JexlScript, JexlExpression {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JexlScript curry(Object... args) {
         String[] parms = script.getParameters();
@@ -322,7 +297,7 @@ public class Script implements JexlScript, JexlExpression {
      * @return the callable
      */
     @Override
-    public Callable<Object> callable(JexlContext context) {
+    public Callable callable(JexlContext context) {
         return callable(context, (Object[]) null);
     }
 
@@ -335,20 +310,67 @@ public class Script implements JexlScript, JexlExpression {
      * @return the callable
      */
     @Override
-    public Callable<Object> callable(JexlContext context, Object... args) {
-        final Interpreter interpreter = jexl.createInterpreter(context, script.createFrame(args));
-        return new Callable<Object>() {
-            /** Use interpreter as marker for not having run. */
-            private Object result = interpreter;
+    public Callable callable(JexlContext context, Object... args) {
+        return new Callable(jexl.createInterpreter(context, script.createFrame(args)));
+    }
 
-            @Override
-            public Object call() throws Exception {
+    /**
+     * Implements the Future and Callable interfaces to help delegation.
+     */
+    public class Callable implements java.util.concurrent.Callable<Object> {
+        /** The actual interpreter. */
+        protected final Interpreter interpreter;
+        /** Use interpreter as marker for not having run. */
+        protected volatile Object result;
+
+        /**
+         * The base constructor.
+         * @param intrprtr the interpreter to use
+         */
+        protected Callable(Interpreter intrprtr) {
+            this.interpreter = intrprtr;
+            this.result = intrprtr;
+        }
+
+        /**
+         * Run the interpreter.
+         * @return the evaluation result
+         */
+        protected Object interpret() {
+            return interpreter.interpret(script);
+        }
+
+        @Override
+        public Object call() throws Exception {
+            synchronized(this) {
                 if (result == interpreter) {
                     checkCacheVersion();
-                    result = interpreter.interpret(script);
+                    result = interpret();
                 }
                 return result;
             }
-        };
+        }
+
+        /**
+         * Soft cancel the execution.
+         * @return true if cancel was successful, false otherwise
+         */
+        public boolean cancel() {
+            return interpreter.cancel();
+        }
+
+        /**
+         * @return true if evaluation was cancelled, false otherwise
+         */
+        public boolean isCancelled() {
+            return interpreter.isCancelled();
+        }
+
+        /**
+         * @return true if interruption will throw a JexlException.Cancel, false otherwise
+         */
+        public boolean isCancellable() {
+            return interpreter.isCancellable();
+        }
     }
 }

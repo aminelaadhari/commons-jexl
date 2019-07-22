@@ -94,6 +94,8 @@ import org.apache.commons.jexl3.parser.JexlNode;
 import org.apache.commons.jexl3.parser.ParserVisitor;
 
 import java.util.regex.Pattern;
+import org.apache.commons.jexl3.parser.ASTAnnotatedStatement;
+import org.apache.commons.jexl3.parser.ASTAnnotation;
 
 /**
  * Helps pinpoint the cause of problems in expressions that fail during evaluation.
@@ -576,13 +578,28 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(ASTGTNode node, Object data) {
         return infixChildren(node, " > ", false, data);
     }
-    /** Checks identifiers that contain space, quote, double-quotes or backspace. */
-    protected static final Pattern QUOTED_IDENTIFIER = Pattern.compile("['\"\\s\\\\]");
+    
+    /** Checks identifiers that contain spaces or punctuation
+     * (but underscore, at-sign, sharp-sign and dollar).
+     */
+    protected static final Pattern QUOTED_IDENTIFIER = 
+            Pattern.compile("[\\s]|[\\p{Punct}&&[^@#\\$_]]");
+    
+    /**
+     * Checks whether an identifier should be quoted or not.
+     * @param str the identifier
+     * @return true if needing quotes, false otherwise
+     */
+    protected boolean needQuotes(String str) {
+        return QUOTED_IDENTIFIER.matcher(str).find()
+            || "size".equals(str)
+            || "empty".equals(str);
+    }
 
     @Override
     protected Object visit(ASTIdentifier node, Object data) {
         String image = node.getName();
-        if (QUOTED_IDENTIFIER.matcher(image).find()) {
+        if (needQuotes(image)) {
             // quote it
             image = "'" + image.replace("'", "\\'") + "'";
         }
@@ -593,7 +610,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(ASTIdentifierAccess node, Object data) {
         builder.append(".");
         String image = node.getName();
-        if (QUOTED_IDENTIFIER.matcher(image).find()) {
+        if (needQuotes(image)) {
             // quote it
             image = "'" + image.replace("'", "\\'") + "'";
         }
@@ -958,5 +975,33 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(ASTJxltLiteral node, Object data) {
         String img = node.getLiteral().replace("`", "\\`");
         return check(node, "`" + img + "`", data);
+    }
+
+    @Override
+    protected Object visit(ASTAnnotation node, Object data) {
+        int num = node.jjtGetNumChildren();
+        builder.append('@');
+        builder.append(node.getName());
+        if (num > 0) {
+            builder.append("(");
+            accept(node.jjtGetChild(0), data);
+            for(int i = 0; i < num; ++i) {
+                builder.append(", ");
+                JexlNode child = node.jjtGetChild(i);
+                acceptStatement(child, data);
+            }
+            builder.append(")");
+        }
+        return null;
+    }
+
+    @Override
+    protected Object visit(ASTAnnotatedStatement node, Object data) {
+        int num = node.jjtGetNumChildren();
+        for (int i = 0; i < num; ++i) {
+            JexlNode child = node.jjtGetChild(i);
+            acceptStatement(child, data);
+        }
+        return data;
     }
 }

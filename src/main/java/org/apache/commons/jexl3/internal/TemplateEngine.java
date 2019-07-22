@@ -41,7 +41,7 @@ import java.util.Set;
  */
 public final class TemplateEngine extends JxltEngine {
     /** The TemplateExpression cache. */
-    private final Engine.SoftCache<String, TemplateExpression> cache;
+    private final SoftCache<String, TemplateExpression> cache;
     /** The JEXL engine instance. */
     private final Engine jexl;
     /** The first character for immediate expressions. */
@@ -61,7 +61,7 @@ public final class TemplateEngine extends JxltEngine {
      */
     public TemplateEngine(Engine aJexl, boolean noScript, int cacheSize, char immediate, char deferred) {
         this.jexl = aJexl;
-        this.cache = aJexl.new SoftCache<String, TemplateExpression>(cacheSize);
+        this.cache = new SoftCache<String, TemplateExpression>(cacheSize);
         immediateChar = immediate;
         deferredChar = deferred;
         noscript = noScript;
@@ -86,7 +86,7 @@ public final class TemplateEngine extends JxltEngine {
      * Each instance carries a counter index per (composite sub-) template expression type.
      * @see ExpressionBuilder
      */
-    static enum ExpressionType {
+    enum ExpressionType {
         /** Constant TemplateExpression, count index 0. */
         CONSTANT(0),
         /** Immediate TemplateExpression, count index 1. */
@@ -540,7 +540,7 @@ public final class TemplateEngine extends JxltEngine {
         @Override
         protected TemplateExpression prepare(Interpreter interpreter) {
             String value = interpreter.interpret(node).toString();
-            JexlNode dnode = jexl.parse(jexl.isDebug() ? node.jexlInfo() : null, value, null, false, noscript);
+            JexlNode dnode = jexl.parse(node.jexlInfo(), value, null, false, noscript);
             return new ImmediateExpression(value, dnode, this);
         }
 
@@ -659,16 +659,10 @@ public final class TemplateEngine extends JxltEngine {
         Exception xuel = null;
         TemplateExpression stmt = null;
         try {
-            if (cache == null) {
+            stmt = cache.get(expression);
+            if (stmt == null) {
                 stmt = parseExpression(info, expression, null);
-            } else {
-                synchronized (cache) {
-                    stmt = cache.get(expression);
-                    if (stmt == null) {
-                        stmt = parseExpression(info, expression, null);
-                        cache.put(expression, stmt);
-                    }
-                }
+                cache.put(expression, stmt);
             }
         } catch (JexlException xjexl) {
             xuel = new Exception(xjexl.getInfo(), "failed to parse '" + expression + "'", xjexl);
@@ -712,7 +706,7 @@ public final class TemplateEngine extends JxltEngine {
     }
 
     /** The different parsing states. */
-    private static enum ParseState {
+    private enum ParseState {
         /** Parsing a constant. */
         CONST,
         /** Parsing after $ . */
@@ -902,11 +896,11 @@ public final class TemplateEngine extends JxltEngine {
     /**
      * The enum capturing the difference between verbatim and code source fragments.
      */
-    static enum BlockType {
+    enum BlockType {
         /** Block is to be output "as is" but may be a unified expression. */
         VERBATIM,
         /** Block is a directive, ie a fragment of JEXL code. */
-        DIRECTIVE;
+        DIRECTIVE
     }
 
     /**

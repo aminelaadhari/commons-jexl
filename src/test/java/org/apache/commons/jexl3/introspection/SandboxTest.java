@@ -32,7 +32,13 @@ public class SandboxTest extends JexlTestCase {
 
     public SandboxTest() {
         super("SandboxTest");
-        JEXL.setClassLoader(getClass().getClassLoader());
+    }
+
+
+    public static class CantSeeMe {
+        public boolean doIt() {
+            return false;
+        }
     }
 
     @NoJexl
@@ -79,6 +85,10 @@ public class SandboxTest extends JexlTestCase {
 
         public String Quux() {
             return name + "-quux";
+        }
+        
+        public int doIt() {
+            return 42;
         }
 
         @NoJexl
@@ -186,6 +196,30 @@ public class SandboxTest extends JexlTestCase {
             // ok, alias should not have been accessible
             LOGGER.info(xvar.toString());
         }
+    }
+        
+    @Test
+    public void testCantSeeMe() throws Exception {
+        JexlContext jc = new MapContext();
+        String expr = "foo.doIt()";
+        JexlScript script;
+        Object result = null;
+
+        JexlSandbox sandbox = new JexlSandbox(false);
+        sandbox.white(Foo.class.getName());
+        JexlEngine sjexl = new JexlBuilder().sandbox(sandbox).strict(true).create();
+
+        jc.set("foo", new CantSeeMe());
+        script = sjexl.createScript(expr);
+        try {
+            result = script.execute(jc);
+            Assert.fail("should have failed, doIt()");
+        } catch (JexlException xany) {
+            //
+        }
+        jc.set("foo", new Foo("42"));
+            result = script.execute(jc);
+        Assert.assertEquals(42, ((Integer) result).intValue());
     }
 
     @Test

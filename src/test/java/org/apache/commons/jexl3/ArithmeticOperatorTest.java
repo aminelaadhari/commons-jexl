@@ -95,6 +95,16 @@ public class ArithmeticOperatorTest extends JexlTestCase {
     }
 
     @Test
+    public void testStartsEndsWithStringDot() throws Exception {
+        asserter.setVariable("x.y", "foobar");
+        asserter.assertExpression("x.y =^ 'foo'", Boolean.TRUE);
+        asserter.assertExpression("x.y =$ 'foo'", Boolean.FALSE);
+        asserter.setVariable("x.y", "barfoo");
+        asserter.assertExpression("x.y =^ 'foo'", Boolean.FALSE);
+        asserter.assertExpression("x.y =$ 'foo'", Boolean.TRUE);
+    }
+
+    @Test
     public void testNotStartsEndsWithString() throws Exception {
         asserter.setVariable("x", "foobar");
         asserter.assertExpression("x !^ 'foo'", Boolean.FALSE);
@@ -102,6 +112,16 @@ public class ArithmeticOperatorTest extends JexlTestCase {
         asserter.setVariable("x", "barfoo");
         asserter.assertExpression("x !^ 'foo'", Boolean.TRUE);
         asserter.assertExpression("x !$ 'foo'", Boolean.FALSE);
+    }
+
+    @Test
+    public void testNotStartsEndsWithStringDot() throws Exception {
+        asserter.setVariable("x.y", "foobar");
+        asserter.assertExpression("x.y !^ 'foo'", Boolean.FALSE);
+        asserter.assertExpression("x.y !$ 'foo'", Boolean.TRUE);
+        asserter.setVariable("x.y", "barfoo");
+        asserter.assertExpression("x.y !^ 'foo'", Boolean.TRUE);
+        asserter.assertExpression("x.y !$ 'foo'", Boolean.FALSE);
     }
 
     public static class MatchingContainer {
@@ -349,6 +369,10 @@ public class ArithmeticOperatorTest extends JexlTestCase {
         public Date now() {
             return new Date(System.currentTimeMillis());
         }
+
+        public Date multiply(Date d0, Date d1) {
+            throw new ArithmeticException("unsupported");
+        }
     }
 
     public static class DateContext extends MapContext {
@@ -365,6 +389,34 @@ public class ArithmeticOperatorTest extends JexlTestCase {
 
         public String format(Number number, String fmt) {
             return new DecimalFormat(fmt).format(number);
+        }
+    }
+
+    @Test
+    public void testOperatorError() throws Exception {
+        testOperatorError(true);
+        testOperatorError(false);
+    }
+
+    private void testOperatorError(boolean silent) throws Exception {
+        CaptureLog log = new CaptureLog();
+        DateContext jc = new DateContext();
+        Date d = new Date();
+        JexlEngine jexl = new JexlBuilder().logger(log).strict(true).silent(silent).cache(32)
+                                           .arithmetic(new DateArithmetic(true)).create();
+        JexlScript expr0 = jexl.createScript("date * date", "date");
+        try {
+            Object value0 = expr0.execute(jc, d);
+            if (!silent) {
+                Assert.fail("should have failed");
+            } else {
+                Assert.assertEquals(1, log.count("warn"));
+            }
+        } catch(JexlException.Operator xop) {
+            Assert.assertEquals("*", xop.getSymbol());
+        }
+        if (!silent) {
+            Assert.assertEquals(0, log.count("warn"));
         }
     }
 
