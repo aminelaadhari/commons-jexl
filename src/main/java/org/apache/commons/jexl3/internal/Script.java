@@ -49,6 +49,13 @@ public class Script implements JexlScript, JexlExpression {
      */
     protected int version;
 
+    public void dispose() {
+        jexl = null;
+        source = null;
+        script = null;
+        version = null;
+    }
+
     /**
      * Do not let this be generally instantiated with a 'new'.
      *
