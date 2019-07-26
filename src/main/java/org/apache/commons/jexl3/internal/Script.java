@@ -53,7 +53,6 @@ public class Script implements JexlScript, JexlExpression {
         jexl = null;
         source = null;
         script = null;
-        version = null;
     }
 
     /**
