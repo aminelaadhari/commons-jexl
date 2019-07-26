@@ -35,15 +35,15 @@ public class Script implements JexlScript, JexlExpression {
     /**
      * The engine for this expression.
      */
-    protected final Engine jexl;
+    protected Engine jexl;
     /**
      * Original expression stripped from leading and trailing spaces.
      */
-    protected final String source;
+    protected String source;
     /**
      * The resulting AST we can interpret.
      */
-    protected final ASTJexlScript script;
+    protected ASTJexlScript script;
     /**
      * The engine version (as class loader change count) that last evaluated this script.
      */
@@ -61,6 +61,12 @@ public class Script implements JexlScript, JexlExpression {
         source = expr;
         script = ref;
         version = jexl.getUberspect().getVersion();
+    }
+
+    public void dispose() {
+        jexl = null;
+        source = null;
+        script = null;
     }
 
     /**
