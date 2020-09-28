@@ -33,7 +33,7 @@ package org.apache.commons.jexl3.parser;
  */
 public class SimpleNode implements Node {
     /** The parent node. */
-    private JexlNode parent;
+    @Weak private JexlNode parent;
     /** The array of children nodes. */
     private JexlNode[] children;
     /** The node type id. */

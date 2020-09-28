@@ -277,7 +277,7 @@ public final class Scope {
      */
     public static final class Frame {
         /** The scope. */
-        private final Scope scope;
+        @Weak private final Scope scope;
         /** The actual stack frame. */
         private final Object[] stack;
         /** Number of curried parameters. */
