@@ -16,6 +16,7 @@
  */
 package org.apache.commons.jexl3.internal;
 
+import com.google.j2objc.annotations.Weak;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
