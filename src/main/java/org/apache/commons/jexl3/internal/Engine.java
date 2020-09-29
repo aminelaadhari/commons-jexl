@@ -16,6 +16,7 @@
  */
 package org.apache.commons.jexl3.internal;
 
+import com.google.j2objc.annotations.WeakOuter;
 import org.apache.commons.jexl3.*;
 import org.apache.commons.jexl3.internal.introspection.SandboxUberspect;
 import org.apache.commons.jexl3.internal.introspection.Uberspect;
@@ -220,6 +221,7 @@ public class Engine extends JexlEngine {
      * @param <K> the cache key entry type
      * @param <V> the cache key value type
      */
+    @WeakOuter
     protected class SoftCache<K, V> {
         /**
          * The cache size.
