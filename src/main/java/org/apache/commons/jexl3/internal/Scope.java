@@ -16,6 +16,7 @@
  */
 package org.apache.commons.jexl3.internal;
 
+import com.google.j2objc.annotations.Weak;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -277,7 +278,7 @@ public final class Scope {
      */
     public static final class Frame {
         /** The scope. */
-        private final Scope scope;
+        @Weak private final Scope scope;
         /** The actual stack frame. */
         private final Object[] stack;
         /** Number of curried parameters. */
